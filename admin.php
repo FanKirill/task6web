@@ -22,17 +22,11 @@ function getDB() {
 
 // ---------- HTTP-авторизация через таблицу admin ----------
 function authenticateAdmin() {
-    if (empty($_SERVER['PHP_AUTH_USER']) || empty($_SERVER['PHP_AUTH_PW'])) {
-        sendAuthHeaders();
+    if (empty($_SERVER['PHP_AUTH_USER']) || empty($_SERVER['PHP_AUTH_PW']) ||
+        $_SERVER['PHP_AUTH_USER'] !== 'admin' || $_SERVER['PHP_AUTH_PW'] !== 'admin') {
+        header('HTTP/1.1 401 Unauthorized');
+        header('WWW-Authenticate: Basic realm="Admin Area"');
         die('<h1>401 Требуется авторизация</h1>');
-    }
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT password_hash FROM admin WHERE login = ?");
-    $stmt->execute([$_SERVER['PHP_AUTH_USER']]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$admin || !password_verify($_SERVER['PHP_AUTH_PW'], $admin['password_hash'])) {
-        sendAuthHeaders();
-        die('<h1>401 Неверный логин или пароль</h1>');
     }
 }
 
